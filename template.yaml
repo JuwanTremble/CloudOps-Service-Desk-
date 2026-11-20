@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudOps Service Desk - authenticated, serverless IT requests API
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 128
+    Architectures: [x86_64]
+
+Resources:
+  RequestsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: ownerId
+          AttributeType: S
+        - AttributeName: requestId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ownerId
+          KeyType: HASH
+        - AttributeName: requestId
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false # Enable for production; backups have additional cost.
+      SSESpecification:
+        SSEEnabled: true
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      AutoVerifiedAttributes: [email]
+      UsernameAttributes: [email]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+
+  RequestsApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      Auth:
+        DefaultAuthorizer: CognitoJwt
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: '$request.header.Authorization'
+            JwtConfiguration:
+              issuer: !Sub 'https://cognito-idp.${AWS::Region}.${AWS::URLSuffix}/${UserPool}'
+              audience:
+                - !Ref UserPoolClient
+
+  RequestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.handler
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref RequestsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RequestsTable
+      Events:
+        Create:
+          Type: HttpApi
+          Properties: {ApiId: !Ref RequestsApi, Path: /requests, Method: POST}
+        List:
+          Type: HttpApi
+          Properties: {ApiId: !Ref RequestsApi, Path: /requests, Method: GET}
+        Get:
+          Type: HttpApi
+          Properties: {ApiId: !Ref RequestsApi, Path: '/requests/{requestId}', Method: GET}
+        Update:
+          Type: HttpApi
+          Properties: {ApiId: !Ref RequestsApi, Path: '/requests/{requestId}', Method: PATCH}
+
+  RequestFunctionLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${RequestFunction}'
+      RetentionInDays: 7
+
+  RequestErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda errors occurred within five minutes (inspect CloudWatch logs)
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref RequestFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  ApiUrl:
+    Description: Authenticated request API
+    Value: !Sub 'https://${RequestsApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/prod'
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+  RequestsTableName:
+    Value: !Ref RequestsTable
