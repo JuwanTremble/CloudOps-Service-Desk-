@@ -10,3 +10,6 @@ samconfig.toml
 *.pem
 *.key
 .DS_Store
+
+/test_api.py
+/patch_ticket.py
