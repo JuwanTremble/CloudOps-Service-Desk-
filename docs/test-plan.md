@@ -15,7 +15,10 @@ Record observed results and screenshots in evidence/. Do not claim success befor
 | T09 | Verify CloudWatch error alarm | Alarm exists with expected configuration | PASS — alarm state OK; configuration verified |
 | T10 | sam delete | Stack deleted | Not run |
 | T11 | PATCH existing VPN ticket to resolved | 200 and resolved status | PASS — HTTP 200, status verified in DynamoDB |
-
+| T12 | Direct SNS email notification | Email delivered | PASS |
+| T13 | Verify CloudWatch SNS alarm action | Enabled and correct SNS topic | PASS |
+| T14 | Simulated CloudWatch ALARM transition | Alarm email delivered | PASS |
+| T15 | Verify Lambda dashboard metrics | Invocations, Errors, Duration visible | PASS — 1 invocation, 0 errors, 2.6 ms average duration in a 24-hour window |
 ## Verified test evidence (2026-11-22)
 
 - T02: [Created VPN support ticket](../evidence/dynamodb-ticket-created.png) — title VPN Connection Failure; category network; priority high; status open.

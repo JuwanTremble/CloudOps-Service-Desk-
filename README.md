@@ -156,6 +156,66 @@ Run the cross-user isolation test with a second Cognito lab account. See [accept
 **Evidence:**
 - `evidence/cloudwatch-lambda-logs.png`
 - `evidence/cloudwatch-error-alarm.png`
+- Amazon CloudWatch provides centralized Lambda logging, seven-day log retention, and error monitoring.
+- Amazon SNS provides email notifications through a confirmed subscription.
+- CloudWatch alarm actions were verified as enabled and connected to the deployed SNS topic.
+- A direct SNS test email and a controlled CloudWatch ALARM-state notification were successfully received.
+- The monitoring integration was validated in the AWS `us-east-2` lab environment.
+
+**Limitations:** The controlled alarm transition verifies notification delivery, not real Lambda failure detection. Production readiness, security hardening, and performance testing remain incomplete.
+
+### CloudOps Operations Dashboard
+
+**Business problem:** IT administrators need centralized visibility into application activity, execution failures, and processing performance.
+
+**Solution:** An Amazon CloudWatch dashboard visualizing key AWS Lambda metrics.
+
+**Monitoring metrics:**
+- **Invocations:** Tracks Lambda execution volume.
+- **Errors:** Identifies Lambda invocation failures.
+- **Duration:** Tracks average execution time to support performance investigation.
+
+**Architectural reasoning:** CloudWatch integrates directly with AWS Lambda and provides managed metrics without deploying or maintaining additional monitoring servers.
+
+**Business value:** Gives cloud operations teams a centralized view of application health, supports troubleshooting, and complements the existing SNS notification system.
+
+**Validation status:** Dashboard created; Lambda Invocations widget saved. Error and Duration widgets pending verification.
+
+**Evidence:** `evidence/cloudwatch-operations-dashboard.png`
+
+**Future improvements:** Add API Gateway request counts, 4xx/5xx errors, latency metrics, and Infrastructure as Code for dashboard deployment.
+
+### CloudWatch Dashboard — Observed Performance Metrics
+
+**Environment:** AWS us-east-2 (Ohio)  
+**Observation date:** November 22, 2026  
+**Observation window:** Previous 24 hours
+
+| Metric | Observed Value | Interpretation |
+|---|---|---|
+| AWS Lambda Invocations | 1 | One function invocation recorded |
+| AWS Lambda Errors | 0 | No Lambda execution errors recorded |
+| AWS Lambda Average Duration | 2.6 ms | Average reported function execution duration |
+
+**Monitoring Configuration**
+
+The CloudOps Operations Dashboard contains three AWS Lambda monitoring widgets:
+
+- **Invocations:** Sum, five-minute period
+- **Errors:** Sum, five-minute period
+- **Duration:** Average, five-minute period
+
+**Business Value**
+
+The dashboard gives IT administrators centralized visibility into serverless application activity, execution failures, and processing performance. This monitoring complements the existing CloudWatch error alarm and Amazon SNS email notification integration.
+
+**Validation Limitations**
+
+These measurements represent a limited 24-hour observation window with only one recorded invocation. They do not establish production availability, typical response times, or performance under load. Lambda duration excludes API Gateway and network latency.
+
+**Evidence:** `evidence/cloudwatch-operations-dashboard.png`
+
+**Next Steps:** Add API Gateway request metrics, HTTP error monitoring, latency measurements, and controlled performance testing.
 ### SNS and CloudWatch Alerting Validation
 
 CloudWatch and Amazon SNS — Verified Alerting Results
