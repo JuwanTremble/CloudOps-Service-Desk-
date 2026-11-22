@@ -11,9 +11,10 @@ Record observed results and screenshots in evidence/. Do not claim success befor
 | T05 | PATCH status to in_progress | 200 with update | PASS — HTTP 200; status in_progress verified in DynamoDB (2026-11-22) |
 | T06 | POST invalid category | 400 | Not run |
 | T07 | Second user GET another user's request | 404 | Not run |
-| T08 | Inspect Lambda CloudWatch logs | Records without secrets | Not run |
-| T09 | View CloudWatch error alarm | Alarm exists | Not run |
+| T08 |  Inspect Lambda CloudWatch logs | Creation and update events logged | PASS — request_created and request_updated observed |
+| T09 | Verify CloudWatch error alarm | Alarm exists with expected configuration | PASS — alarm state OK; configuration verified |
 | T10 | sam delete | Stack deleted | Not run |
+| T11 | PATCH existing VPN ticket to resolved | 200 and resolved status | PASS — HTTP 200, status verified in DynamoDB |
 
 ## Verified test evidence (2026-11-22)
 

@@ -138,7 +138,24 @@ Run the cross-user isolation test with a second Cognito lab account. See [accept
 3. Open the Lambda function's CloudWatch log group; confirm request identifiers appear and secrets do not.
 4. Inspect the function error alarm. **This example creates an alarm but does not send notifications**; integrate SNS if email alerts are desired.
 5. Update the test plan with actual observed results and add redacted screenshots to `evidence/`.
+### CloudWatch Monitoring — Verified Results
 
+**Environment:** AWS US East (Ohio), `us-east-2`
+
+**Validation results:**
+- Verified successful logging of IT support ticket creation and updates in Amazon CloudWatch.
+- Confirmed that `request_created` and `request_updated` events were recorded by the Python Lambda function.
+- Verified that the CloudWatch Lambda error alarm exists and uses the expected metric configuration.
+- Confirmed the error alarm was in the `OK` state during inspection.
+- Verified the alarm evaluates the Lambda `Errors` metric using a five-minute period and a threshold greater than zero.
+
+**Business value:** Centralized logging provides operational visibility into service request activity and helps engineers investigate application behavior. The error alarm provides basic detection of Lambda execution failures without requiring a continuously running monitoring server.
+
+**Limitations:** Email notifications are not yet configured. The Lambda error metric does not detect every failed API request or business-logic error.
+
+**Evidence:**
+- `evidence/cloudwatch-lambda-logs.png`
+- `evidence/cloudwatch-error-alarm.png`
 ## Cost and cleanup
 DynamoDB on-demand operations, Lambda executions, API requests, Cognito features, CloudWatch metrics/logging, and other resources have service-specific pricing or free-tier limitations. Create an AWS Budget; a budget is an alert, **not a hard spending cap**. Do not leave a live lab unattended.
 
