@@ -216,6 +216,62 @@ These measurements represent a limited 24-hour observation window with only one 
 **Evidence:** `evidence/cloudwatch-operations-dashboard.png`
 
 **Next Steps:** Add API Gateway request metrics, HTTP error monitoring, latency measurements, and controlled performance testing.
+
+### API Gateway Observability — Verified Results
+
+**Environment:** AWS us-east-2 (Ohio)  
+**Observation date:** November 22, 2026  
+**Monitoring period:** Previous 24 hours
+
+#### Business Problem
+
+The business requires centralized visibility into API request activity, HTTP failures, and application response times to support infrastructure troubleshooting and service reliability.
+
+#### Implemented Solution
+
+Configured Amazon CloudWatch dashboard widgets to monitor the deployed API Gateway HTTP API and its `prod` stage.
+
+| Metric | Observed Value | Interpretation |
+|---|---|---|
+| API Gateway Request Count | 1 | One request recorded |
+| HTTP 4xx Errors | 0 | No client errors recorded |
+| HTTP 5xx Errors | 0 | No server errors recorded |
+| Average API Latency | 3.2 ms | Reported average API processing latency |
+
+#### Monitoring Configuration
+
+- Request Count: Sum, five-minute period
+- HTTP 4xx Errors: Sum, five-minute period
+- HTTP 5xx Errors: Sum, five-minute period
+- API Latency: Average, five-minute period
+
+#### Architectural Decisions
+
+Amazon CloudWatch was selected for its native integration with API Gateway and AWS Lambda.
+
+API Gateway monitoring complements Lambda monitoring by providing visibility into HTTP request activity, gateway-level failures, and overall API processing latency.
+
+#### Business Value
+
+The dashboard provides administrators with centralized operational visibility, supporting incident investigations, troubleshooting, and identification of abnormal request activity.
+
+#### Validation Limitations
+
+The recorded measurements represent a limited 24-hour observation window containing one reported request. They do not establish production availability, typical performance, scalability, or service-level objectives.
+
+The dashboard is currently managed through the AWS Console rather than Infrastructure as Code.
+
+#### Evidence
+
+[API Gateway Dashboard](evidence/cloudwatch-api-gateway-dashboard.png)
+
+#### Future Improvements
+
+- Infrastructure as Code for CloudWatch dashboards
+- API Gateway access logging
+- p95 latency monitoring
+- Controlled API performance testing
+- Least-privilege IAM security hardening
 ### SNS and CloudWatch Alerting Validation
 
 CloudWatch and Amazon SNS — Verified Alerting Results

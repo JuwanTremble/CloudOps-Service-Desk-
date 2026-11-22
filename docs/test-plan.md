@@ -19,6 +19,9 @@ Record observed results and screenshots in evidence/. Do not claim success befor
 | T13 | Verify CloudWatch SNS alarm action | Enabled and correct SNS topic | PASS |
 | T14 | Simulated CloudWatch ALARM transition | Alarm email delivered | PASS |
 | T15 | Verify Lambda dashboard metrics | Invocations, Errors, Duration visible | PASS — 1 invocation, 0 errors, 2.6 ms average duration in a 24-hour window |
+
+| T16 | Verify API Gateway monitoring | Count, 4xx, 5xx, and Latency metrics | PASS — 1 request, 0 HTTP 4xx, 0 HTTP 5xx, 3.2 ms average latency; 24-hour observation |
+  
 ## Verified test evidence (2026-11-22)
 
 - T02: [Created VPN support ticket](../evidence/dynamodb-ticket-created.png) — title VPN Connection Failure; category network; priority high; status open.
