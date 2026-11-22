@@ -1,6 +1,6 @@
 # CloudOps Service Desk | AWS Serverless IT Request Infrastructure
 
-> **Project status: Scaffold created; AWS deployment and end-to-end validation not yet performed.** This is a portfolio lab using a fictional business case, not a production customer implementation.
+> **Project status: Deployed to AWS us-east-2 and initial end-to-end ticket creation and PATCH status update verified (2026-11-22).** This is a portfolio lab using a fictional business case, not a production customer implementation. Remaining security, monitoring and lifecycle tests are in progress.
 
 ## The business problem
 A fictional 150-person business operating across three offices receives network, equipment, and software support issues by email and phone. Requests are difficult to track consistently, and the business does not want to manage dedicated application servers. The objective is to establish an authenticated, repeatable API foundation for recording and updating IT service requests.
@@ -49,7 +49,7 @@ See [architecture decisions](docs/architecture.md) for security boundaries, deci
 - Lambda logging, seven-day log retention, and an error alarm **without notification delivery**.
 - Unit tests for input validation and a GitHub Actions test workflow.
 
-**Not yet verified:** real AWS deployment, integration results, security tests, and cost measurements.
+**Verified so far (2026-11-22):** SAM stack deployed in `us-east-2`, test employee authenticated through Cognito, unauthorized request rejected, authenticated POST returned HTTP 201 and ticket appeared in DynamoDB, and authenticated PATCH returned HTTP 200 and status `in_progress` appeared in DynamoDB. Full test coverage, production security assessment, and cost measurements are not yet complete. See [test plan](docs/test-plan.md) and [evidence](evidence/README.md).
 
 ## Requirements
 - An AWS account with permission to create CloudFormation/SAM, IAM roles, Lambda, API Gateway, DynamoDB, Cognito, CloudWatch and S3 deployment artifacts.

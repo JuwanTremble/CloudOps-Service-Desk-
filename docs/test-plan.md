@@ -4,13 +4,21 @@ Record observed results and screenshots in evidence/. Do not claim success befor
 
 | ID | Test | Expected | Actual |
 |---|---|---|---|
-| T01 | GET /requests without JWT | 401 | Not run |
-| T02 | Authenticated POST /requests | 201 and requestId | Not run |
+| T01 | GET /requests without JWT | 401 | PASS — API returned Unauthorized (reported 2026-11-22; exact HTTP code not recorded) |
+| T02 | Authenticated POST /requests | 201 and requestId | PASS — HTTP 201; VPN Connection Failure record verified in DynamoDB (reported 2026-11-22) |
 | T03 | Authenticated GET /requests | 200 with owner records | Not run |
 | T04 | GET /requests/{requestId} | 200 for owner | Not run |
-| T05 | PATCH status to in_progress | 200 with update | Not run |
+| T05 | PATCH status to in_progress | 200 with update | PASS — HTTP 200; status in_progress verified in DynamoDB (2026-11-22) |
 | T06 | POST invalid category | 400 | Not run |
 | T07 | Second user GET another user's request | 404 | Not run |
 | T08 | Inspect Lambda CloudWatch logs | Records without secrets | Not run |
 | T09 | View CloudWatch error alarm | Alarm exists | Not run |
 | T10 | sam delete | Stack deleted | Not run |
+
+## Verified test evidence (2026-11-22)
+
+- T02: [Created VPN support ticket](../evidence/dynamodb-ticket-created.png) — title VPN Connection Failure; category network; priority high; status open.
+- T05: [Updated VPN support ticket](../evidence/dynamodb-ticket-updated.png) — authenticated PATCH to `/requests/{requestId}` returned HTTP 200, and the same DynamoDB item showed `in_progress`.
+- These outcomes were observed by the project owner and reported during guided testing. AWS service logs, exact response bodies, and any performance measurements have not been independently audited.
+- **Next test (T11)**: PATCH same ticket status to `resolved`; expect HTTP 200 and verify `resolved` and a newer `updatedAt` in DynamoDB. Not run.
+- **Additional future test**: exercise a valid JWT against `GET /requests/{requestId}` and verify data remains owner-scoped. Not run.
