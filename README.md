@@ -156,6 +156,59 @@ Run the cross-user isolation test with a second Cognito lab account. See [accept
 **Evidence:**
 - `evidence/cloudwatch-lambda-logs.png`
 - `evidence/cloudwatch-error-alarm.png`
+### SNS and CloudWatch Alerting Validation
+
+CloudWatch and Amazon SNS — Verified Alerting Results
+
+Deployment region: us-east-2 (Ohio)
+
+Business problem
+
+IT administrators need timely notification when cloud infrastructure experiences execution failures. Without automated alerting, an issue could go unnoticed until someone manually checks the monitoring dashboard.
+
+Implemented solution
+
+Integrated Amazon CloudWatch with Amazon SNS using AWS SAM and CloudFormation. The existing Lambda error alarm is configured to publish notifications to an SNS topic with a confirmed email subscriber.
+
+Validation results
+
+PASS — SNS topic deployed using Infrastructure as Code.
+
+PASS — Email subscription confirmed.
+
+PASS — Direct SNS test notification successfully delivered.
+
+PASS — CloudWatch alarm actions enabled and linked to the SNS topic.
+
+PASS — Simulated CloudWatch ALARM transition triggered an email notification.
+
+Architectural decisions
+
+Amazon CloudWatch: Detect Lambda execution errors through managed monitoring.
+
+Amazon SNS: Distribute notifications without maintaining a dedicated notification server.
+
+AWS SAM: Maintain reproducible and version-controlled cloud infrastructure.
+
+Email subscription: Provide a straightforward alert destination for this portfolio lab.
+
+Business value
+
+The solution establishes an automated notification path that can improve IT teams' awareness of application failures and reduce reliance on manual infrastructure monitoring.
+
+Limitations
+
+The controlled alarm test verified CloudWatch-to-SNS email delivery. It did not simulate a real Lambda execution failure or measure incident response times. The current alarm does not detect every application-level error.
+
+Evidence
+
+evidence/sns-test-email.png
+
+evidence/cloudwatch-sns-alarm-action.png
+
+evidence/cloudwatch-alarm-email.png
+
+evidence/sns-subscription-confirmed.png
 ## Cost and cleanup
 DynamoDB on-demand operations, Lambda executions, API requests, Cognito features, CloudWatch metrics/logging, and other resources have service-specific pricing or free-tier limitations. Create an AWS Budget; a budget is an alert, **not a hard spending cap**. Do not leave a live lab unattended.
 

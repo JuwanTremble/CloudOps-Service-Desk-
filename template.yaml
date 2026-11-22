@@ -10,6 +10,11 @@ Globals:
     Architectures: [x86_64]
 
 Resources:
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: cloudops-service-desk-alerts
+      DisplayName: CloudOps Service Desk Alerts
   RequestsTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -102,6 +107,10 @@ Resources:
   RequestErrorAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
+
+      AlarmActions:
+        - !Ref AlertTopic
+
       AlarmDescription: Lambda errors occurred within five minutes (inspect CloudWatch logs)
       Namespace: AWS/Lambda
       MetricName: Errors
@@ -116,6 +125,11 @@ Resources:
       TreatMissingData: notBreaching
 
 Outputs:
+
+  AlertTopicArn:
+    Description: SNS topic for CloudWatch operational alerts
+    Value: !Ref AlertTopic
+
   ApiUrl:
     Description: Authenticated request API
     Value: !Sub 'https://${RequestsApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/prod'
