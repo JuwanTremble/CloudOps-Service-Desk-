@@ -14,7 +14,7 @@ Use API Gateway HTTP API with Cognito JWT authorization, Python Lambda compute, 
 - **Cognito**: AWS-managed employee sign-in, with a JWT authorizer before application code runs.
 - **Lambda**: No 24/7 web server to patch; scales with activity.
 - **DynamoDB**: On-demand capacity for variable activity, ownerId partition key and requestId sort key to query one user's requests.
-- **IAM**: Lambda uses a table-scoped policy (bundled CRUD permits more operations than handler requires; tighten later).
+- **IAM**: Lambda uses a table-scoped policy 
 - **CloudWatch**: Seven-day logs and an error metric alarm without outbound notifications.
 - **SAM**: Repeatable deployment, code review and deletion with CloudFormation.
 
@@ -32,3 +32,32 @@ Use API Gateway HTTP API with Cognito JWT authorization, Python Lambda compute, 
 - Point-in-time backups disabled to control lab cost; enable for real production data.
 - Add staff roles and global ticket queue with authorization and GSI before claiming a full company helpdesk.
 - Consider frontend, CI/CD via OIDC, tracing, budgets, SNS notifications, and threat modeling.
+## ADR-002 — Least-Privilege IAM Security Hardening
+
+**Status:** Implemented and functionally verified — November 24, 2026
+
+### Business Problem
+The original AWS SAM `DynamoDBCrudPolicy` granted more DynamoDB operations than the CloudOps Service Desk Lambda application required.
+
+### Security Implementation
+Replaced the broad policy with a custom IAM statement granting four DynamoDB operations against the project's RequestsTable:
+
+- `dynamodb:PutItem` — Create service requests.
+- `dynamodb:GetItem` — Retrieve an individual request.
+- `dynamodb:Query` — List requests owned by the authenticated employee.
+- `dynamodb:UpdateItem` — Update request status.
+
+The deployed Lambda role's inline policy was inspected. No directly attached managed IAM policies were found.
+
+### Regression Testing
+Following deployment, the application passed authenticated POST, individual GET, list GET, and PATCH tests.
+
+A separate IAM Security Regression Test ticket was created and updated to `in_progress`. The original VPN Connection Failure ticket remained `resolved`.
+
+CloudWatch Lambda logs were inspected, with no IAM permission errors observed during the reported review.
+
+### Security Outcome
+The application retains the DynamoDB operations required by its current functionality while reducing unnecessary database permissions.
+
+### Limitations
+Cross-user authorization testing is pending. The test results do not establish a complete production security assessment or validate every possible IAM permission path.

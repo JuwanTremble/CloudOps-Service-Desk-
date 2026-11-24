@@ -6,8 +6,8 @@ Record observed results and screenshots in evidence/. Do not claim success befor
 |---|---|---|---|
 | T01 | GET /requests without JWT | 401 | PASS — API returned Unauthorized (reported 2026-11-22; exact HTTP code not recorded) |
 | T02 | Authenticated POST /requests | 201 and requestId | PASS — HTTP 201; VPN Connection Failure record verified in DynamoDB (reported 2026-11-22) |
-| T03 | Authenticated GET /requests | 200 with owner records | Not run |
-| T04 | GET /requests/{requestId} | 200 for owner | Not run |
+| T03 | Authenticated GET /requests | 200 with owner records | PASS |
+| T04 | GET /requests/{requestId} | 200 for owner | PASS |
 | T05 | PATCH status to in_progress | 200 with update | PASS — HTTP 200; status in_progress verified in DynamoDB (2026-11-22) |
 | T06 | POST invalid category | 400 | Not run |
 | T07 | Second user GET another user's request | 404 | Not run |
@@ -27,5 +27,44 @@ Record observed results and screenshots in evidence/. Do not claim success befor
 - T02: [Created VPN support ticket](../evidence/dynamodb-ticket-created.png) — title VPN Connection Failure; category network; priority high; status open.
 - T05: [Updated VPN support ticket](../evidence/dynamodb-ticket-updated.png) — authenticated PATCH to `/requests/{requestId}` returned HTTP 200, and the same DynamoDB item showed `in_progress`.
 - These outcomes were observed by the project owner and reported during guided testing. AWS service logs, exact response bodies, and any performance measurements have not been independently audited.
-- **Next test (T11)**: PATCH same ticket status to `resolved`; expect HTTP 200 and verify `resolved` and a newer `updatedAt` in DynamoDB. Not run.
-- **Additional future test**: exercise a valid JWT against `GET /requests/{requestId}` and verify data remains owner-scoped. Not run.
+
+## Phase 8 — Least-Privilege IAM Regression Testing
+
+**Verification date:** November 24, 2026  
+**AWS Region:** us-east-2
+
+### IAM Security Verification
+
+- Replaced the broad DynamoDB CRUD policy with four required actions:
+  - dynamodb:PutItem
+  - dynamodb:GetItem
+  - dynamodb:Query
+  - dynamodb:UpdateItem
+- Verified the deployed IAM policy.
+- Confirmed no directly attached managed IAM policies.
+
+### API Regression Test Results
+
+| Test | Expected | Actual |
+|---|---|---|
+| POST /requests | HTTP 201 | PASS — HTTP 201 |
+| GET /requests/{requestId} | HTTP 200 | PASS — HTTP 200 |
+| GET /requests | HTTP 200 | PASS — HTTP 200 |
+| PATCH /requests/{requestId} | HTTP 200 | PASS — HTTP 200 |
+
+### DynamoDB Verification
+
+- IAM Security Regression Test: status `in_progress`.
+- Original VPN Connection Failure ticket: status `resolved`, unchanged.
+
+### CloudWatch Verification
+
+- Located the deployed Lambda function's CloudWatch log group.
+- Reviewed application logs.
+- No IAM permission errors observed during the review.
+
+### Outcome
+
+The CloudOps Service Desk retained its required functionality after IAM permission reduction.
+
+**Remaining security test:** Cross-user ticket isolation using a second Cognito employee account.

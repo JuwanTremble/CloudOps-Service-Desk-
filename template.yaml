@@ -82,8 +82,16 @@ Resources:
         Variables:
           TABLE_NAME: !Ref RequestsTable
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref RequestsTable
+        - Statement:
+            - Sid: AllowRequiredTicketOperations
+              Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:GetItem
+                - dynamodb:Query
+                - dynamodb:UpdateItem
+              Resource: !GetAtt RequestsTable.Arn
+
       Events:
         Create:
           Type: HttpApi
